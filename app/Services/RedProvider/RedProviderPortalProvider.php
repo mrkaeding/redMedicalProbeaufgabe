@@ -89,4 +89,9 @@ class RedProviderPortalProvider implements OrderProvider
         );
     }
 
+    public function deleteOrder(string $providerId): void
+    {
+        $this->authClient()->delete('api/v1/order/'.urlencode($providerId))->throw();
+    }
+
 }

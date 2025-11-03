@@ -26,4 +26,9 @@ interface OrderProvider
      * Create an order at the provider and return its representation (with provider id and current status).
      */
     public function createOrder(OrderType $type): ProviderOrder;
+
+    /**
+     * Delete a provider order by provider id.
+     */
+    public function deleteOrder(string $providerId): void;
 }

@@ -63,4 +63,25 @@ class OrdersController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function destroy(string $id, OrderProvider $provider)
+    {
+        $order = Order::query()->findOrFail($id);
+        if ($order->status !== OrderStatus::COMPLETED) {
+            return response()->json([
+                'message' => 'Order can only be deleted when status is completed.',
+            ], 422);
+        }
+
+        if ($order->provider_reference) {
+            try {
+                $provider->deleteOrder($order->provider_reference);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        $order->delete();
+
+        return response()->noContent();
+    }
 }
