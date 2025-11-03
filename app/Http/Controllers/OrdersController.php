@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use App\Http\Resources\OrderResource;
+use App\Jobs\SyncOrderStatusJob;
 use App\Models\Order;
 use App\Services\RedProvider\OrderProvider;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class OrdersController extends Controller
 {
@@ -33,5 +37,30 @@ class OrdersController extends Controller
     {
         $order = Order::query()->findOrFail($id);
         return new OrderResource($order);
+    }
+
+    public function store(Request $request, OrderProvider $provider)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in([OrderType::CONNECTOR->value, OrderType::VPN_CONNECTION->value])],
+        ]);
+
+        $order = new Order();
+        $order->name = $data['name'];
+        $order->type = OrderType::from($data['type']);
+        $order->status = OrderStatus::ORDERED;
+        $order->save();
+
+        $providerOrder = $provider->createOrder($order->type);
+        $order->provider_reference = $providerOrder->id;
+        $order->status = $providerOrder->status;
+        $order->save();
+
+        SyncOrderStatusJob::dispatch($order->id)->delay(now()->addSeconds(10));
+
+        return (new OrderResource($order))
+            ->response()
+            ->setStatusCode(201);
     }
 }

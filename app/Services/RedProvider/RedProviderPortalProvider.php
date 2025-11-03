@@ -76,4 +76,17 @@ class RedProviderPortalProvider implements OrderProvider
         );
     }
 
+    public function createOrder(OrderType $type): ProviderOrder
+    {
+        $resp = $this->authClient()->post('api/v1/orders', [
+            'type' => $type->value,
+        ])->throw();
+        $data = $resp->json();
+        return new ProviderOrder(
+            id: (string) $data['id'],
+            type: OrderType::from((string) $data['type']),
+            status: OrderStatus::from((string) $data['status']),
+        );
+    }
+
 }

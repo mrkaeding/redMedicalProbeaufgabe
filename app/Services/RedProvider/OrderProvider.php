@@ -22,4 +22,8 @@ interface OrderProvider
      */
     public function getOrder(string $providerId): ProviderOrder;
 
+    /**
+     * Create an order at the provider and return its representation (with provider id and current status).
+     */
+    public function createOrder(OrderType $type): ProviderOrder;
 }

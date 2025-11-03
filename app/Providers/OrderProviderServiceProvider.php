@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 
+use App\Services\RedProvider\MockOrderProvider;
 use App\Services\RedProvider\OrderProvider as OrderProviderContract;
 use App\Services\RedProvider\RedProviderPortalProvider;
 use Illuminate\Support\ServiceProvider;
@@ -14,7 +15,9 @@ class OrderProviderServiceProvider extends ServiceProvider
         $this->app->singleton(OrderProviderContract::class, function () {
             $useMock = (bool) config('redprovider.use_mock');
             if ($useMock) {
-                return 'placeholder';
+                if ($useMock) {
+                    return new MockOrderProvider();
+                }
             }
             return new RedProviderPortalProvider();
         });
