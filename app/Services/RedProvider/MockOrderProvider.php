@@ -41,4 +41,9 @@ class MockOrderProvider implements OrderProvider
         return new ProviderOrder($providerId, $entry['type'], $entry['status']);
     }
 
+    public function deleteOrder(string $providerId): void
+    {
+        unset(self::$orders[$providerId]);
+    }
+
 }
