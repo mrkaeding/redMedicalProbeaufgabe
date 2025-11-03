@@ -28,4 +28,10 @@ class OrdersController extends Controller
 
         return OrderResource::collection($orders);
     }
+
+    public function show(string $id)
+    {
+        $order = Order::query()->findOrFail($id);
+        return new OrderResource($order);
+    }
 }
