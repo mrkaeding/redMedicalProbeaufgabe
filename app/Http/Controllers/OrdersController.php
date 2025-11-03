@@ -41,14 +41,29 @@ class OrdersController extends Controller
 
     public function store(Request $request, OrderProvider $provider)
     {
+        $allowedTypes = [OrderType::CONNECTOR->value, OrderType::VPN_CONNECTION->value];
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', Rule::in([OrderType::CONNECTOR->value, OrderType::VPN_CONNECTION->value])],
+            'type' => ['required', Rule::in($allowedTypes)],
+        ], [
+            'type.in' => 'The selected type is invalid. Allowed values are: '.implode(', ', $allowedTypes).'.',
         ]);
+
+        try {
+            $type = OrderType::from($data['type']);
+        } catch (\ValueError $e) {
+            return response()->json([
+                'message' => 'The selected type is invalid.',
+                'errors' => [
+                    'type' => ['Allowed values are: '.implode(', ', $allowedTypes).'.']
+                ],
+            ], 422);
+        }
 
         $order = new Order();
         $order->name = $data['name'];
-        $order->type = OrderType::from($data['type']);
+        $order->type = $type;
         $order->status = OrderStatus::ORDERED;
         $order->save();
 
