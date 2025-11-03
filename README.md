@@ -1,59 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Bewerberaufgabe
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Herzlichen Glückwunsch, Du erhältst heute unsere Coding Challenge! Weiter unten findest Du die Aufgaben-Stellung.
 
-## About Laravel
+## Kriterien
+1. Es werden nur Lösungen gewertet, die mit PHP/Laravel programmiert wurden. Wenn Du über die Aufgabe hinaus Hilfstools 
+entwickeln möchtest, kannst Du dafür auch eine andere Sprache / ein anderes Framework verwenden.
+2. Für die Aufgabe dürfen nur Libraries verwendet werden, die sich bereits in der `composer.json` befinden.
+3. Zeitansatz max. 4 Stunden
+4. Abgabe der Lösung erfolgt als Repository (github oder bitbucket). Du kannst einfach ein Repository anlegen, deine 
+Lösung pushen und uns den Link zukommen lassen. Bitte achte darauf, dass das Repository alle zur Ausführung benötigten Dateien und Anweisungen enthält.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> Im Repository bitte darauf achten, dass die Commit Struktur nachvollziehbar und die Lösung klar von der Aufgabenstellung getrennt ist.
+> Am besten machst Du vor Beginn einen initialen Commit.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Aufgabe 
+Es soll ein API-Service (JSON) erstellt werden, der Bestellungen entgegennehmen kann. Für den API-Service muss keine
+Authentifizierung implementiert werden.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Die Bestellungen müssen an einen Drittanbieter Service `RedProviderPortal` weiter gegeben werden. Dieser Service wird
+kompiliert zur Verfügung gestellt (siehe "RedProviderPortal Dokumentation" weiter unten). Konfiguration, wie URL,
+Secrets, usw., sollen per Environment Variablen gesetzt werden können.
 
-## Learning Laravel
+Außerdem soll möglich sein, per Environment Variable zu entscheiden, ob das RedProviderPortal angesprochen wird, oder ein
+interner Mock Service. Der Mock Service soll innerhalb der Applikation gehandelt werden und keine Kommunikation nach
+außen durchführen.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Die aufgegebenen Bestellungen sollen in der Datenbank persistiert werden und eine UUID als `id` haben. Der
+RedProviderPortal nimmt Bestellungen entgegen und verarbeitet diese asynchron. Achtung! Die Verarbeitung der Bestellung 
+kann längere Zeit in Anspruch nehmen.
+Wird eine Bestellung durchgeführt, hat diese den Status `ordered`. Anschließend verarbeitet der RedProviderPortal die 
+Bestellung im Status `processing`. Ist die Bestellung abgeschlossen und bereit, hat sie den Status `completed`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Die Applikation soll den Status in der Datenbank aktualisieren, sobald der RedProviderPortal die Verarbeitung
+abgeschlossen hat.
 
-## Laravel Sponsors
+> Bitte achte drauf, dass Dein Service selbst die Daten speichern und ausgeben soll. Der `RedProviderPortal` Service kann
+> die Daten jederzeit löschen. Die Daten sollen aber nicht verloren gehen.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## API-Service Beschreibung
 
-### Premium Partners
+Es werden vier Endpunkte gefordert:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Auflisten aller Bestellungen
+- Erstellen einer Bestellung
+- Ausgeben einer bestimmten Bestellung
+- Löschen einer Bestellung
 
-## Contributing
+Bestellungen, die ausgegeben werden, sollen die Werte `id`, `name`, `type` und `status` liefern.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Beim Auflisten von Bestellungen soll nach dem Namen gefiltert und nach `name` und dem Erstellungsdatum der Bestellung
+sortiert werden können.
 
-## Code of Conduct
+Für die Erstellung werden die Attribute `name` und `type` benötigt. Es gibt die Bestelltypen (`type`) `connector` und
+`vpn_connection`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Gelöscht werden kann eine Bestellung nur, wenn der Status `completed` ist. Die bestellung soll dann sowohl aus der 
+Datenbank als auch im RedProviderPortal gelöscht werden.
 
-## Security Vulnerabilities
+# RedProviderPortal Dokumentation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Der RedProviderPortal-Service nimmt über HTTPS-REST Requests auf Port 3000 Bestellungen entgegen und verarbeitet diese.
+Das TLS Zertifikat ist in der Datei `ssl_cert.pem`.
+Dabei dauert das Verarbeiten der Bestellungen bis zu 30 Minuten.
+Über den _Bestellungen ausgeben_-Endpunkt kann man sich den aktuellen Status der Bestellung abholen.
 
-## License
+Für den Zugriff muss ein OAuth-ähnliches Access Token abgeholt und bei allen anderen Requests als Bearer-Authorization Header mitgegeben werden.
+Zu Testzwecken hat RED den User mit der Client Id `Fun` mit dem Secret `=work@red` angelegt.
+Dieser kann zum Testen und Entwickeln benutzt werden.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Starten des RedProviderPortals
+
+Die kompilierte JavaScript Node Datei ist im Ordner `RedProviderPortal` zu finden.
+Auszuführen ist sie mit mind. Node 22. Abhängigkeiten müssen keine installiert werden.
+
+````bash
+node ./RedProviderPortal/redproviderportal.js
+````
+
+## Verfügbare Endpunkte
+
+### Token
+
+Für jeden Request muss ein Token erstellt werden. Um ein Token zu erstellen, müssen `client_id` und `client_secret`
+übergeben werden. Es wird das Token und die Gültigkeit in Sekunden zurückgegeben.
+
+Method: `POST`
+Path: `api/v1/token`
+Body:
+
+```json
+{
+  "client_id": "",
+  "client_secret": ""
+}
+```
+
+Response:
+
+```json
+{
+  "access_token": "",
+  "ttl": 60
+}
+```
+
+### Bestellungen auflisten
+
+Method: `GET`
+Path: `api/v1/orders`
+
+Response:
+
+```json
+[
+  {
+    "id": "",
+    "type": "",
+    "status": ""
+  }
+]
+```
+
+### Bestellung erstellen
+
+Method: `POST`
+Path: `api/v1/orders`
+Body:
+
+```json
+{
+  "type": ""
+}
+```
+
+Response:
+
+```json
+{
+  "id": "",
+  "type": "",
+  "status": ""
+}
+```
+
+### Bestellung ausgeben
+
+Method: `GET`
+Path: `api/v1/order/some-id`
+
+Response:
+
+```json
+{
+  "id": "",
+  "type": "",
+  "status": ""
+}
+```
+
+### Bestellung löschen
+
+Method: `DELETE`
+Path: `api/v1/order/some-id`
